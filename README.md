@@ -4,11 +4,19 @@
 
 当前包含一个中文优先的 skill：`llm-batch-prompting`，用于为批量大模型调用场景生成稳定、可复用、可校验的 XML Prompt Contract。
 
+另有 `public_skills_learn/` 用于记录热门 skill 方向和学习笔记；`SKILL_IMPORT_GUIDE.md` 记录 Codex、Cursor、Trae 的导入和适配方式。
+
 ## 仓库结构
 
 ```text
 .
 ├── README.md
+├── SKILL_IMPORT_GUIDE.md
+├── public_skills_learn/
+│   ├── README.md
+│   ├── fullstack-feature-planner.md
+│   ├── llm-eval-designer.md
+│   └── rag-system-review.md
 └── skills/
     └── llm-batch-prompting/
         ├── SKILL.md
@@ -24,11 +32,22 @@
 
 新增 skill 时，统一放在 `skills/<skill-name>/` 下。仓库根目录尽量只保留仓库级说明和 `skills/` 目录，避免把单个 skill 的实现文件散落在根目录。
 
+候选 skill 或外部学习笔记先放 `public_skills_learn/`；只有真正可触发、可安装的 skill 才进入 `skills/`。
+
 ## Skills
 
 | Skill | 说明 | 路径 |
 | --- | --- | --- |
 | `llm-batch-prompting` | 批量大模型调用场景下的中文 XML Prompt Contract 设计与检查 | `skills/llm-batch-prompting/` |
+
+## 学习文档
+
+| 文档 | 说明 |
+| --- | --- |
+| `SKILL_IMPORT_GUIDE.md` | Codex、Cursor、Trae 三类 coding 工具的导入和适配方式 |
+| `public_skills_learn/llm-eval-designer.md` | LLM eval 设计候选 skill 学习文档 |
+| `public_skills_learn/fullstack-feature-planner.md` | 全栈功能规划候选 skill 学习文档 |
+| `public_skills_learn/rag-system-review.md` | RAG 系统审查候选 skill 学习文档 |
 
 ## Skill: llm-batch-prompting
 
