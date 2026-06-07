@@ -1,13 +1,13 @@
 ---
 name: llm-batch-prompting
-description: This skill should be used when the user asks in Chinese or English to design prompts for batch LLM API calls, create stable XML prompt templates, write Prompt 101 guidance for API pipelines, prepare JSON/JSONL batch requests, improve prompt stability, define output schemas, add examples, or build evaluation and retry rules for large-scale model invocation.
+description: This skill should be used when the user asks in Chinese or English to design stable prompts for batch LLM calls, create XML prompt templates, write Prompt 101 guidance, improve prompt stability, define output schemas, add examples, or build prompt review and evaluation checks for large-scale model invocation.
 ---
 
-# 批量大模型 API Prompt 设计
+# 批量大模型 Prompt 设计
 
 ## 概览
 
-用于为批量调用大模型 API 的任务设计稳定、可复用、可校验的 Prompt Contract。默认用中文写作，默认 prompt 结构使用 XML 标签，适用于分类、抽取、打标、评分、摘要、改写、实体标准化、质检等批处理场景。
+用于为批量调用大模型的任务设计稳定、可复用、可校验的 Prompt Contract。默认用中文写作，默认 prompt 结构使用 XML 标签，适用于分类、抽取、打标、评分、摘要、改写、实体标准化、质检等批处理场景。
 
 核心目标不是写一个“看起来聪明”的 prompt，而是让几百到几万条输入在同一套规则下稳定输出、容易解析、容易回放、容易评测。
 
@@ -15,10 +15,10 @@ description: This skill should be used when the user asks in Chinese or English 
 
 把 prompt 当成接口契约处理：
 
-1. 每条请求必须自包含上下文，不依赖历史对话。
+1. 每条输入必须自包含上下文，不依赖历史对话。
 2. 先定义输出 schema，再写任务说明和示例。
 3. 用 XML 标签隔离背景、角色、任务、要求、输入、输出格式、示例和异常处理。
-4. 批量任务默认使用低随机性参数，并固定模型版本、prompt 版本和字段顺序。
+4. 批量任务默认固定 prompt 版本、字段顺序、标签定义和兜底策略。
 5. 上全量前必须先抽样评测，覆盖正常样本、边界样本、缺字段样本和脏数据样本。
 
 ## 工作流
@@ -62,23 +62,19 @@ description: This skill should be used when the user asks in Chinese or English 
 
 不要把 XML 当成真正要被解析的 XML 文件；它是给模型分隔上下文的结构化标记。标签名要稳定、描述性强，并且在同一项目内保持一致。
 
-### 4. 生成 API 批量请求
+### 4. 检查 Prompt 可批量复用性
 
-根据用户目标选择请求形态：
+生成 prompt 后，检查它是否适合批量稳定运行：
 
-- OpenAI Batch API：通常输出 JSONL，每行包含 `custom_id`、`method`、`url`、`body`。
-- Anthropic Message Batches：每条请求保留独立 `custom_id` 和完整 `messages`。
-- 普通并发调用：保留同样的 prompt contract、请求参数和结果落盘字段。
+- 是否只处理一条 `<current_input>`，避免一次塞入多条导致错位。
+- 是否要求输出中返回输入 ID，方便结果回填和人工排查。
+- 是否有明确的 `<output_schema>`，并禁止额外解释、Markdown 或代码块。
+- 是否有稳定的 `<requirements>` 和 `<decision_rules>`，而不是依赖隐含常识。
+- 是否覆盖空值、冲突、越界、低置信度等 `<edge_cases>`。
+- 是否提供 3-5 个和真实分布接近的 `<examples>`。
+- 是否标注 `prompt_contract version`，方便改版对比。
 
-批量请求必须记录：
-
-- `custom_id`：可回填到源数据的唯一 ID。
-- `prompt_version`：例如 `product-tagging-v1.3.0`。
-- `model`：固定具体模型版本时优先固定。
-- `temperature`：分类、抽取、评分通常用 `0` 或接近 `0`。
-- `max_output_tokens`：按 schema 上限设置，避免输出失控。
-
-更多批量请求细节见 `references/batch-api-patterns.md`。
+更多 prompt 写作与自查规则见 `references/prompt-writing-checks.md`。
 
 ### 5. 评测与上线前检查
 
@@ -90,22 +86,22 @@ description: This skill should be used when the user asks in Chinese or English 
 - 低置信度和缺字段是否按规则兜底。
 - prompt 改版后是否保留对比结果。
 
-如用户已有 JSONL 文件，可运行 `scripts/validate_batch_jsonl.py` 做基础结构检查。
+如用户已有 prompt 文件，可运行 `scripts/validate_prompt_contract.py` 检查关键 XML 标签是否齐全。
 
 ## 输出要求
 
 给用户交付时，优先输出以下内容：
 
-1. 一份可直接放入 API 的 XML prompt 模板。
+1. 一份可直接复用的 XML prompt 模板。
 2. 一份输出 schema。
 3. 3-5 个示例，包括边界样本。
-4. 推荐 API 参数。
+4. Prompt 自查清单。
 5. 小样本评测计划。
-6. 可选：JSONL 请求样例或校验脚本使用方式。
+6. 可选：XML Prompt Contract 标签校验脚本使用方式。
 
 ## 资源
 
 - `references/xml-prompt-template.md`：中文 XML Prompt Contract 模板。
-- `references/batch-api-patterns.md`：批量 API 请求组织、版本、参数和重试规范。
+- `references/prompt-writing-checks.md`：Prompt 写作、自查、版本和常见风险规范。
 - `references/evaluation-checklist.md`：上线前抽样评测和稳定性检查清单。
-- `scripts/validate_batch_jsonl.py`：检查 JSONL 批处理文件的基本结构、重复 `custom_id` 和常见配置风险。
+- `scripts/validate_prompt_contract.py`：检查 XML Prompt Contract 是否包含关键标签。

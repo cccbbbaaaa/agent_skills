@@ -1,4 +1,4 @@
 interface:
   display_name: "LLM Batch Prompting"
-  short_description: "批量大模型 API 的稳定 Prompt 设计"
-  default_prompt: "Use $llm-batch-prompting to turn this batch API task into a Chinese XML prompt contract with schema, examples, and validation checks."
+  short_description: "批量大模型稳定 Prompt 设计"
+  default_prompt: "Use $llm-batch-prompting to turn this batch LLM task into a Chinese XML prompt contract with schema, examples, and validation checks."
